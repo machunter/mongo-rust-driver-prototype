@@ -67,7 +67,7 @@ struct ReplicaSetData {
 impl Clone for ReplicaSetData {
     pub fn clone(&self) -> ReplicaSetData {
         let mut sec = PriorityQueue::new(); // PriorityQueue doesn't impl Clone
-        for self.sec.iter().advance |&elem| {
+        for &elem in self.sec.iter().advance {
             sec.push(elem);
         }
 
@@ -296,7 +296,7 @@ impl Eq for ReplicaSetData {
         }
 
         let mut it = self.sec.iter().zip(other.sec.iter());
-        for it.advance |(&x, &y)| {
+        for (&x, &y) in it.advance {
             if x != y { return false; }
         }
 
@@ -310,7 +310,7 @@ impl Eq for ReplicaSetData {
         }
 
         let mut it = self.sec.iter().zip(other.sec.iter());
-        for it.advance |(&x, &y)| {
+        for (&x, &y) in it.advance {
             if x != y { return true; }
         }
 
@@ -321,7 +321,7 @@ impl Eq for ReplicaSetData {
 impl ReplicaSetConnection {
     pub fn new(seed : &[(~str, uint)]) -> ReplicaSetConnection {
         let mut seed_arc = ~[];
-        for seed.iter().advance |&(ip,port)| {
+        for &(ip,port) in seed.iter().advance {
             seed_arc.push((ip, port));
         }
         ReplicaSetConnection {
@@ -369,7 +369,7 @@ impl ReplicaSetConnection {
         /* BEGIN BLOCK to remove with new io */
         let mut err_str = ~"";
         let seed_list = seed.get();
-        for seed_list.iter().advance |&(ip, port)| {
+        for &(ip, port) in seed_list.iter().advance {
             let server = @NodeConnection::new(ip, port);
             let server_list = server._check_master_and_do(
                     |bson_doc : &~BsonDocument| -> Result<~[(~str, uint)], MongoErr> {
@@ -391,7 +391,7 @@ impl ReplicaSetConnection {
                         if err.is_none() {
                             let fields = list_doc.unwrap().fields;
                             let mut host_str = ~"";
-                            for fields.iter().advance |&(_, @host_doc)| {
+                            for &(_, @host_doc) in fields.iter().advance {
                                 match host_doc {
                                     UString(s) => host_str = s,
                                     _ => err = Some(MongoErr::new(
@@ -555,7 +555,7 @@ impl ReplicaSetConnection {
         /* BEGIN BLOCK to remove with new io */
         let mut err = None;
         let mut err_str = ~"";
-        for hosts.iter().advance |&(ip, port)| {
+        for &(ip, port) in hosts.iter().advance {
             let server = @NodeConnection::new(ip.clone(), port);
 
             // get server stats packaged in a NodeData
@@ -609,7 +609,7 @@ impl ReplicaSetConnection {
                         Some(doc) => {
                             match doc {
                                 &Embedded(ref val) => {
-                                    for val.fields.iter().advance |&(@k,@v)| {
+                                    for &(@k,@v) in val.fields.iter().advance {
                                         match v {
                                             UString(val) => tags.set(k,val),
                                             _ => {
@@ -993,7 +993,7 @@ impl ReplicaSetConnection {
         let pri = match state.clone().pri { None => ~[], Some(s) => ~[s] };
         let mut sec = PriorityQueue::new();
 
-        for state.sec.iter().advance |&s| {
+        for &s in state.sec.iter().advance {
             sec.push(s);
         }
 
@@ -1008,30 +1008,30 @@ impl ReplicaSetConnection {
                 PRIMARY_PREF(ref ts) => {
                     servers.push_all_move(pri);
                     let ordered = sec.to_sorted_vec();
-                    for ordered.rev_iter().advance |&s| {
+                    for &s in ordered.rev_iter().advance {
                         servers.push(s);
                     }
                     ts
                 }
                 SECONDARY_ONLY(ref ts) => {
                     let ordered = sec.to_sorted_vec();
-                    for ordered.rev_iter().advance |&s| {
+                    for &s in ordered.rev_iter().advance {
                         servers.push(s);
                     }
                     ts
                 }
                 SECONDARY_PREF(ref ts) => {
                     let ordered = sec.to_sorted_vec();
-                    for ordered.rev_iter().advance |&s| {
+                    for &s in ordered.rev_iter().advance {
                         servers.push(s);
                     }
                     servers.push_all_move(pri);
                     ts
                 }
                 NEAREST(ref ts) => {
-                    for pri.iter().advance |&s| { sec.push(s); }
+                    for &s in pri.iter().advance { sec.push(s); }
                     let ordered = sec.to_sorted_vec();
-                    for ordered.rev_iter().advance |&s| {
+                    for &s in ordered.rev_iter().advance {
                         servers.push(s);
                     }
                     ts
@@ -1060,8 +1060,8 @@ impl ReplicaSetConnection {
 
         // iterate through available servers, checking if they match
         //      given tagset
-        for servers.iter().advance |&server| {
-            for ts_list.iter().advance |ts| {
+        for &server in servers.iter().advance {
+            for ts in ts_list.iter().advance {
                 if server.tagset.matches(ts) {
                     let result = NodeConnection::new(
                                     server.ip.clone(),

@@ -23,7 +23,7 @@ static L_END: bool = true;
 #[link_args = "-lmd5"]
 extern {
     fn md5_init(pms: *MD5State);
-    fn md5_append(pms: *MD5State, data: *const u8, nbytes: c_int);
+    fn md5_append(pms: *MD5State, data: *u8, nbytes: c_int);
     fn md5_finish(pms: *MD5State, digest: *[u8,..16]);
 }
 
@@ -63,7 +63,7 @@ impl MD5State {
     }
 }
 
-priv fn md5(msg: &str) -> ~str {
+fn md5(msg: &str) -> ~str {
     let msg_bytes = msg.to_bytes(L_END);
     let m = MD5State::new(msg_bytes.len() as u64);
     let digest: [u8,..16] = [
@@ -80,7 +80,7 @@ priv fn md5(msg: &str) -> ~str {
     }
 
     let mut result: ~str = ~"";
-    for range(0, 16) |i| {
+    for i in range(0, 16) {
         let mut byte = fmt!("%x", digest[i] as uint);
         if byte.len() == 1 {
             byte = (~"0").append(byte);

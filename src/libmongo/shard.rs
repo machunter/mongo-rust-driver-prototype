@@ -159,7 +159,7 @@ impl MongosClient {
         out.push_str(~"  shards:\n");
         match config.get_collection(~"shards").find(None, None, None) {
             Ok(ref mut c) => {
-                for c.advance |sh| {
+                for sh in c.advance {
                     out.push_str(fmt!("\t%s\n", sh.to_str()));
                 }
             },
@@ -169,7 +169,7 @@ impl MongosClient {
         match config.get_collection(~"databases").find(None,
             None, None) {
             Ok(ref mut c) => {
-                for c.advance |d| {
+                for d in c.advance {
                     out.push_str(fmt!("\t%s\n", d.to_str()));
                     //TODO chunk info
                 }

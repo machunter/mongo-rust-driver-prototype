@@ -45,7 +45,7 @@ impl BsonFormattable for RSMember {
         }
         member_doc.put(~"host", UString(self.host.clone()));
 
-        for self.opts.iter().advance |&opt| {
+        for &opt in self.opts.iter().advance {
             member_doc.union(opt.to_bson_t());
         }
 
@@ -60,7 +60,7 @@ impl BsonFormattable for RSMember {
         let mut member = RSMember::new(~"", ~[]);
         let mut opts = ~[];
 
-        for bson_doc.fields.iter().advance |&(@k,@v)| {
+        for &(@k,@v) in bson_doc.fields.iter().advance {
             match k {
                 ~"_id" => if !member._id.is_empty() {
                     return Err(~"duplicate _id for RSMember");
@@ -94,7 +94,7 @@ impl BsonFormattable for RSMember {
 }
 macro_rules! mk_get (
     ($prop_find:ident) => ({
-        for self.opts.iter().advance |opt| {
+        for opt in self.opts.iter().advance {
             match opt {
                 &$prop_find(ref x) => return Some(x),
                 _ => (),
@@ -112,7 +112,7 @@ macro_rules! mk_get_mut (
             }
         }
         {
-            for self.opts.mut_iter().advance |opt| {
+            for opt in self.opts.mut_iter().advance {
                 match opt {
                     &$prop_find(ref mut x) => {
                         ptr = Some(x);
@@ -204,7 +204,7 @@ impl BsonFormattable for RSConfig {
         }
 
         let mut tmp_doc = BsonDocument::new();
-        for self.members.iter().enumerate().advance |(i,&member)| {
+        for (i,&member) in self.members.iter().enumerate().advance {
             if member._id.is_empty() { member._id.put_back(i); }
             tmp_doc.put(i.to_str(), member.to_bson_t());
         }
@@ -214,7 +214,7 @@ impl BsonFormattable for RSConfig {
         match &self.settings {
             &None => (),
             &Some(ref a) => {
-                for a.iter().advance |&opt| {
+                for &opt in a.iter().advance {
                     tmp_doc.union(opt.to_bson_t());
                 }
                 conf_doc.put(~"settings", Embedded(~tmp_doc));
@@ -259,7 +259,7 @@ impl BsonFormattable for RSConfig {
             None => (),
             Some(doc) => match doc {
                 &Embedded(ref sub) => {
-                    for sub.fields.iter().advance |&(@k,@v)| {
+                    for &(@k,@v) in sub.fields.iter().advance {
                         let mut tmp = BsonDocument::new();
                         tmp.put(k,v);
                         match BsonFormattable::from_bson_t::<RS_OPTION>(&Embedded(~tmp)) {
@@ -502,7 +502,7 @@ impl RS {
 
         // figure out which node to remove
         let mut ind = None;
-        for conf.members.iter().enumerate().advance |(i,&m)| {
+        for (i,&m) in conf.members.iter().enumerate().advance {
             if m.host == host {
                 ind = Some(i);
             }

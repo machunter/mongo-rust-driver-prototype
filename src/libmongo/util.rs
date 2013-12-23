@@ -113,7 +113,7 @@ impl FromStr for MongoUri {
                 host_str = host_str.replace(repl_str, ":");
                 let mut hosts_iter = host_str.split_iter(',');
                 let mut hosts_full = ~[];
-                for hosts_iter.advance |h| { hosts_full.push(h); }
+                for h in hosts_iter.advance  { hosts_full.push(h); }
                 let mut hosts = ~[];
                 let mut ports = ~[];
                 if url.port.is_some() {
@@ -125,7 +125,7 @@ impl FromStr for MongoUri {
                         }
                     }
                 }
-                for hosts_full.iter().advance |&h| {
+                for &h in hosts_full.iter().advance {
                     match parse_host(h) {
                         Ok((host_str, po)) => {
                             hosts.push(host_str);
@@ -232,7 +232,7 @@ pub struct TagSet {
 impl Clone for TagSet {
     pub fn clone(&self) -> TagSet {
         let mut tags = TreeMap::new();
-        for self.tags.iter().advance |(&k,&v)| {
+        for (&k,&v) in self.tags.iter().advance {
             tags.insert(k, v);
         }
         TagSet { tags : tags }
@@ -241,7 +241,7 @@ impl Clone for TagSet {
 impl BsonFormattable for TagSet {
     pub fn to_bson_t(&self) -> Document {
         let mut ts_doc = BsonDocument::new();
-        for self.tags.iter().advance |(&k,&v)| {
+        for (&k,&v) in self.tags.iter().advance {
             ts_doc.put(k, UString(v));
         }
         Embedded(~ts_doc)
@@ -250,7 +250,7 @@ impl BsonFormattable for TagSet {
         let mut ts = TagSet::new(~[]);
         match doc {
             &Embedded(ref bson_doc) => {
-                for bson_doc.fields.iter().advance |&(@k,@v)| {
+                for &(@k,@v) in bson_doc.fields.iter().advance {
                     match v {
                         UString(s) => ts.set(k,s),
                         _ => return Err(~"not TagSet struct (val not UString)"),
@@ -265,7 +265,7 @@ impl BsonFormattable for TagSet {
 impl TagSet {
     pub fn new(tag_list : &[(&str, &str)]) -> TagSet {
         let mut tags = TreeMap::new();
-        for tag_list.iter().advance |&(field, val)| {
+        for &(field, val) in tag_list.iter().advance {
             tags.insert(field.to_owned(), val.to_owned());
         }
         TagSet { tags : tags }
@@ -297,7 +297,7 @@ impl TagSet {
      * Usage: member.matches(tagset)
      */
     pub fn matches(&self, other : &TagSet) -> bool {
-        for other.tags.iter().advance |(f0, &v0)| {
+        for (f0, &v0) in other.tags.iter().advance {
             match self.tags.find(f0) {
                 None => return false,
                 Some(v1) => {
@@ -371,7 +371,7 @@ macro_rules! process_flags(
             None => 0i32,
             Some(opt_array) => {
                 let mut tmp = 0i32;
-                for opt_array.iter().advance |&f| { tmp |= f as i32; }
+                for &f in opt_array.iter().advance { tmp |= f as i32; }
                 tmp
             }
         }
@@ -404,7 +404,7 @@ pub fn parse_tags(tag_str : &str) -> Result<Option<TagSet>, MongoErr> {
     if tag_str.find_str(":").is_some() {
         let mut tags = TagSet::new([]);
         let mut it = tag_str.split_iter(',');
-        for it.advance |tag| {
+        for tag in it.advance {
             match tag.find_str(":") {
                 Some(i) => {
                     tags.set(   tag.slice_to(i).to_owned(),

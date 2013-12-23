@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-use extra::future;
-use extra::net::tcp;
+ extern mod extra;
+ use extra::future;
+ use std::rt::uv::uvll;
 
-pub trait Mockable {
+
+pub trait Mockable  {
     fn mock(state: int) -> Self;
 }
 
@@ -24,7 +26,7 @@ impl Mockable for () {
     fn mock(_: int) -> () { () }
 }
 impl Mockable for char {
-    fn mock(_: int) -> char { 0 as char }
+    fn mock(_: int) -> char { 0u8 as char }
 }
 
 impl Mockable for int {
@@ -32,7 +34,7 @@ impl Mockable for int {
 }
 
 impl Mockable for i8 {
-    fn mock(_: int) -> i8 { Mockable::mock::<int>(0) as i8 }
+    fn mock(_: int) -> i8 { 0i8}
 }
 
 impl Mockable for uint {
@@ -40,7 +42,7 @@ impl Mockable for uint {
 }
 
 impl Mockable for u8 {
-    fn mock(_: int) -> u8 { Mockable::mock::<uint>(0) as u8 }
+    fn mock(_: int) -> u8 { 0u8 }
 }
 
 impl Mockable for float {
@@ -53,26 +55,26 @@ impl Mockable for ~str {
 
 impl<T:Mockable> Mockable for ~T {
     fn mock(state: int) -> ~T {
-        ~Mockable::mock::<T>(state)
+        ~Mockable::mock(state)
     }
 }
 
 impl<T:Mockable> Mockable for @T {
     fn mock(state: int) -> @T {
-        @Mockable::mock::<T>(state)
+        @Mockable::mock(state)
     }
 }
 
 impl<T:Mockable> Mockable for ~[T] {
     fn mock(state: int) -> ~[T] {
-        ~[Mockable::mock::<T>(state)]
+        ~[Mockable::mock(state)]
     }
 }
 
 impl<T:Mockable> Mockable for Option<T> {
     fn mock(state: int) -> Option<T> {
         if state == 0 {
-            Some(Mockable::mock::<T>(state))
+            Some(Mockable::mock(state))
         }
         else {
             None
@@ -83,10 +85,10 @@ impl<T:Mockable> Mockable for Option<T> {
 impl<T:Mockable,U:Mockable> Mockable for Result<T,U> {
     fn mock(state: int) -> Result<T,U> {
         if state == 0 {
-            Ok(Mockable::mock::<T>(state))
+            Ok(Mockable::mock(state))
         }
         else if state == 1 {
-            Err(Mockable::mock::<U>(state))
+            Err(Mockable::mock(state))
         }
         else {
             fail!("mocking error: invalid state from Result")
@@ -94,14 +96,14 @@ impl<T:Mockable,U:Mockable> Mockable for Result<T,U> {
     }
 }
 
-impl<T:Mockable + Send> Mockable for future::Future<T> {
-    fn mock(state: int) -> future::Future<T> {
-        do future::spawn { Mockable::mock::<T>(state) }
+impl<T:Mockable + Send> Mockable for extra::future::Future<T> {
+    fn mock(state: int) -> extra::future::Future<T> {
+        do future::Future::spawn { Mockable::mock(state)}
     }
 }
 
-impl Mockable for tcp::TcpErrData {
-    fn mock(_: int) -> tcp::TcpErrData {
-        tcp::TcpErrData { err_name: ~"mock error", err_msg: ~"mock" }
+impl Mockable for uvll::uv_err_data  {
+    fn mock(_: int) -> uvll::uv_err_data  {
+        uvll::uv_err_data { err_name: ~"mock error", err_msg: ~"mock" }
     }
 }

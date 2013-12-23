@@ -115,7 +115,7 @@ impl Client {
             }
         };
         let fields = list.fields;
-        for fields.iter().advance |&(_, @doc)| {
+        for &(_, @doc) in fields.iter().advance {
             match doc {
                 Embedded(bson_doc) => match bson_doc.find(~"name") {
                     Some(tmp_doc) => {
@@ -313,7 +313,7 @@ impl Client {
         let result = if uri.hosts.len() > 1 {
             let mut seed = ~[];
             let mut it = uri.hosts.iter().zip(uri.ports.iter());
-            for it.advance |(&h, &p)| {
+            for (&h, &p) in it.advance {
                 seed.push((h, p));
             }
 //println(fmt!("rs, %?", seed));
@@ -355,7 +355,7 @@ impl Client {
         let mut wc = ~[];
         let mut read_pref = None;
         let mut ts_list = ~[];
-        for uri.options.iter().advance |&(opt, val)| {
+        for &(opt, val) in uri.options.iter().advance {
             match opt {
                 // write concern options
                 ~"w" => {
@@ -510,7 +510,7 @@ impl Client {
         self.disconnect();
 
         let mut seed = ~[];
-        for conf.members.iter().advance |&member| {
+        for &member in conf.members.iter().advance {
             match parse_host(member.host.as_slice()) {
                 Ok(p) => seed.push(p),
                 Err(e) => return Err(e),
@@ -805,7 +805,7 @@ impl Client {
                 Some(&UString(ref s)) => {
                     let mut it = s.split_iter('.').zip(ver.split_iter('.'));
                     let mut res = Ok(());
-                    for it.advance |(vcur, varg)| {
+                    for (vcur, varg) in it.advance {
                         let ncur = FromStr::from_str::<uint>(vcur);
                         let narg = FromStr::from_str::<uint>(varg);
                         if ncur > narg {

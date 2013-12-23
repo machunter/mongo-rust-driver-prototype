@@ -74,7 +74,7 @@ impl BsonFormattable for INDEX_TYPE {
         let mut bson_doc = BsonDocument::new();
         match self {
             &NORMAL(ref arr) => {
-                for arr.iter().advance |&(key, order)| {
+                for &(key, order) in arr.iter().advance {
                     bson_doc.put(key, Int32(order as i32));
                 }
             }
@@ -102,7 +102,7 @@ impl BsonFormattable for INDEX_TYPE {
 impl BsonFormattable for MongoIndex {
     pub fn to_bson_t(&self) -> Document {
         let mut bson_doc = BsonDocument::new();
-        for self.keys.iter().advance |&f| {
+        for &f in self.keys.iter().advance {
             bson_doc.union(f.to_bson_t());
         }
         Embedded(~bson_doc)
@@ -124,7 +124,7 @@ impl BsonFormattable for MongoIndex {
         // index key parts
         let mut normal = ~[];
         let mut hay = (None, None);
-        for bson_doc.fields.iter().advance |&(@k,@v)| {
+        for &(@k,@v) in bson_doc.fields.iter().advance {
             match k {
                 // basic fields parsing
                 ~"v" => match v {
@@ -143,7 +143,7 @@ impl BsonFormattable for MongoIndex {
                 // key parsing
                 ~"key" => match v {
                     Embedded(f) => {
-                        for f.fields.iter().advance |&(@k,@v)| {
+                        for &(@k,@v) in f.fields.iter().advance {
                             match v {
                                 Int32(ord) => match ord {
                                     1 => normal.push((k, ASC)),
@@ -306,7 +306,7 @@ impl MongoIndexSpec {
         match options {
             None => (),
             Some(opt_arr) => {
-                for opt_arr.iter().advance |&opt| {
+                for &opt in opt_arr.iter().advance {
                     opts_str.push(match opt {
                         INDEX_NAME(n) => {
                             name = Some(n.clone());
@@ -330,10 +330,10 @@ impl MongoIndexSpec {
             -> (~str, ~[~str]) {
         let mut name = ~[];
         let mut index_str = ~[];
-        for index_arr.iter().advance |&field| {
+        for &field in index_arr.iter().advance {
             match field {
                 NORMAL(arr) => {
-                    for arr.iter().advance |&(key, order)| {
+                    for &(key, order) in arr.iter().advance {
                         index_str.push(fmt!("\"%s\":%d", key, order as int));
                         if get_name { name.push(fmt!("%s_%d", key, order as int)); }
                     }

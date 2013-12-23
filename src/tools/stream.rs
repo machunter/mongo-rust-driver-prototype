@@ -21,7 +21,7 @@ pub trait Stream<T:Eq> {
     ///Move the stream forward by count units.
     fn pass(&mut self, count: uint);
     ///Apply a function to the first count units and return the results in a vector.
-    fn process<V: Copy>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V];
+    fn process<V: Clone>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V];
     /**
      * Collect the first count elements and return them in a vector.
     *This is logically equivalent to self.process(count, id), modulo pointer types.
@@ -38,7 +38,7 @@ pub trait Stream<T:Eq> {
     fn pass_while(&mut self, to_skip: &[T]);
 }
 
-impl<T:Eq + Copy> Stream<T> for ~[T] {
+impl<T:Eq + Clone> Stream<T> for ~[T] {
     fn has_next(&self) -> bool {
         self.len() >= 1
     }
@@ -49,10 +49,10 @@ impl<T:Eq + Copy> Stream<T> for ~[T] {
         &'a self[0]
     }
     fn pass(&mut self, count: uint) {
-        self.process(count, |&x| x);
+        self.process(count, |x|  {;});
     }
 
-    fn process<V: Copy>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V] {
+    fn process<V: Clone>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V] {
         let mut c = 0;
         let mut ret: ~[V] = ~[];
         if !self.has_next() || count > self.len() as uint {
@@ -67,7 +67,7 @@ impl<T:Eq + Copy> Stream<T> for ~[T] {
     }
 
     fn aggregate(&mut self, count: uint) -> ~[T] {
-        self.process(count, |&x| x)
+        self.process(count, |x| x)
     }
 
     fn until(&mut self, f: &fn(&T) -> bool) -> ~[T] {
@@ -76,13 +76,13 @@ impl<T:Eq + Copy> Stream<T> for ~[T] {
             if !self.has_next() || f(self.first()) {
                 return ret;
             }
-            ret.push(copy self[0]);
+            ret.push(self[0].clone());
             self.pass(1);
         }
     }
     fn expect(&self, search: &[T]) -> Option<T> {
         if !self.has_next() { return None; }
-        for search.iter().advance |&choice| {
+        for &choice in search.iter() {
             if choice == self[0] {
                 return Some(choice);
             }

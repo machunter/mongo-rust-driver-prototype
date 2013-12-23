@@ -21,7 +21,7 @@ use encode::*;
 
 ///This trait is for parsing non-BSON object notations such as JSON, XML, etc.
 pub trait ObjParser<V> {
-    pub fn from_string(s: &str) -> Result<V,~str>;
+    fn from_string(s: &str) -> Result<V,~str>;
 }
 
 ///JSON parsing struct. T is a Stream<char>.

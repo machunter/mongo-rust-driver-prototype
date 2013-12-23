@@ -257,7 +257,7 @@ impl<T:BsonFormattable + Copy> BsonFormattable for ~[T] {
     fn to_bson_t(&self) -> Document {
         let mut doc = BsonDocument::new();
         let s = self.map(|elt| elt.to_bson_t());
-        for s.iter().enumerate().advance |(i, &elt)| {
+        for (i, &elt) in s.iter().enumerate().advance {
             doc.put(i.to_str(), elt);
         }
         return Array(~doc);
@@ -267,7 +267,7 @@ impl<T:BsonFormattable + Copy> BsonFormattable for ~[T] {
         match *doc {
             Array(ref d) => {
                 let mut ret = ~[];
-                for d.fields.iter().advance |&(_,@v)| {
+                for &(_,@v) in d.fields.iter().advance {
                      match BsonFormattable::from_bson_t::<T>(&v) {
                         Ok(elt) => ret.push(elt),
                         Err(e) => return Err(e)
@@ -283,7 +283,7 @@ impl<T:BsonFormattable + Copy> BsonFormattable for ~[T] {
 impl<V:BsonFormattable> BsonFormattable for HashMap<~str,V> {
     fn to_bson_t(&self) -> Document {
             let mut doc = BsonDocument::new();
-            for self.iter().advance |(&k,&v)| {
+            for (&k,&v) in self.iter().advance {
                 doc.put(k.to_str(),v.to_bson_t());
             }
         return Embedded(~doc);
@@ -293,7 +293,7 @@ impl<V:BsonFormattable> BsonFormattable for HashMap<~str,V> {
         match *doc {
             Embedded(ref d) => {
                 let mut m = HashMap::new();
-                for d.fields.iter().advance |&(@k, @v)| {
+                for &(@k, @v) in d.fields.iter().advance {
                     match BsonFormattable::from_bson_t::<V>(&v) {
                         Ok(elt) => m.insert(k, elt),
                         Err(e) => return Err(e)
@@ -303,7 +303,7 @@ impl<V:BsonFormattable> BsonFormattable for HashMap<~str,V> {
             }
             Array(ref d) => {
                 let mut m = HashMap::new();
-                for d.fields.iter().advance |&(@k, @v)| {
+                for &(@k, @v) in d.fields.iter().advance {
                     match BsonFormattable::from_bson_t::<V>(&v) {
                         Ok(elt) => m.insert(k, elt),
                         Err(e) => return Err(e)

@@ -50,7 +50,7 @@ pub struct BsonParser<T> {
 priv fn bytesum(bytes: &[u8]) -> u64 {
     let mut i = 0;
     let mut ret: u64 = 0;
-    for bytes.iter().advance |&byte| {
+    for &byte in bytes.iter().advance {
         ret |= (byte as u64) >> (8 * i);
         i += 1;
     }
@@ -146,7 +146,7 @@ impl<T:Stream<u8>> BsonParser<T> {
     ///Parse a double.
     fn _double(&mut self) -> Document {
         let mut u: u64 = 0;
-        for range(0,8) |i| {
+        for i in range(0,8) {
             //TODO: how will this hold up on big-endian architectures?
             u |= (*self.stream.first() as u64 << ((8 * i)));
             self.stream.pass(1);

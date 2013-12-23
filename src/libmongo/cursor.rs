@@ -351,7 +351,7 @@ impl Cursor {
         let mut spec = BsonDocument::new();
         match orderby {
             NORMAL(fields) => {
-                for fields.iter().advance |&(k,v)| {
+                for &(k,v) in fields.iter().advance {
                     spec.put(k, Int32(v as i32));
                 }
             },
@@ -372,7 +372,7 @@ impl Cursor {
      *              of which to add
      */
     pub fn add_flags(&mut self, flags : ~[QUERY_FLAG]) {
-        for flags.iter().advance |&f| {
+        for &f in flags.iter().advance {
             self.flags |= (f as i32);
         }
     }
@@ -385,7 +385,7 @@ impl Cursor {
      *              of which to remove
      */
     pub fn remove_flags(&mut self, flags : ~[QUERY_FLAG]) {
-        for flags.iter().advance |&f| {
+        for &f in flags.iter().advance {
             self.flags &= !(f as i32);
         }
     }
@@ -469,7 +469,7 @@ impl Cursor {
         false
     }
     fn add_query_spec(&mut self, doc: &BsonDocument) {
-        for doc.fields.iter().advance |&(@k, @v)| {
+        for &(@k, @v) in doc.fields.iter().advance {
             self.query_spec.put(k,v);
         }
     }

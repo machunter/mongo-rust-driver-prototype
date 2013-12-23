@@ -132,7 +132,7 @@ pub struct BsonDocEncoder {
 macro_rules! cstr(
     ($val:ident) => {
         |e| (
-            for $val.iter().advance |c| {
+            for c in $val.iter().advance {
                 e.emit_char(c);
             }
         )
@@ -142,7 +142,7 @@ macro_rules! cstr(
 impl Clone for BsonDocument {
     pub fn clone(&self) -> BsonDocument {
         let mut map = ~OrderedHashmap::new();
-        for self.fields.iter().advance |&(@k, @v)| {
+        for &(@k, @v) in self.fields.iter().advance {
             map.insert(k, v);
         }
         BsonDocument {
@@ -224,7 +224,7 @@ impl BsonDocEncoder {
 impl<E:Encoder> Encodable<E> for BsonDocument {
     fn encode(&self, encoder: &mut E) {
         encoder.emit_i32(self.size);
-        for self.fields.iter().advance |&(@k, @v)| {
+        for &(@k, @v) in self.fields.iter().advance {
             let b = match v {
                Double(_) => 0x01,
                UString(_) => 0x02,
@@ -276,7 +276,7 @@ impl<E:Encoder> Encodable<E> for Document {
             Binary(st, ref dat) => {
                 encoder.emit_i32(dat.len() as i32);
                 encoder.emit_u8(st);
-                for dat.iter().advance |&elt| {
+                for &elt in dat.iter().advance {
                     encoder.emit_u8(elt);
                 }
             }
@@ -284,7 +284,7 @@ impl<E:Encoder> Encodable<E> for Document {
                 if !(id.len() == 12) {
                     fail!(fmt!("invalid object id found: %?", id));
                 }
-                for id.iter().advance |&elt| {
+                for &elt in id.iter().advance {
                     encoder.emit_u8(elt);
                 }
             }
@@ -372,7 +372,7 @@ impl<'self> BsonDocument {
 
     ///Adds a list of key/value pairs and updates size. Returns nothing.
     pub fn put_all(&mut self, pairs: ~[(~str, Document)]) {
-        for pairs.iter().advance |&(k,v)| {
+        for &(k,v) in pairs.iter().advance {
             self.fields.insert(k, v);
         }
         self.size = map_size(self.fields);
@@ -385,7 +385,7 @@ impl<'self> BsonDocument {
     pub fn union(&mut self, other : Document) {
         match other {
             Embedded(doc) => {
-                for doc.fields.iter().advance |&(@k,@v)| {
+                for &(@k,@v) in doc.fields.iter().advance {
                     self.put(k,v);
                 }
             }
@@ -408,10 +408,10 @@ impl<'self> BsonDocument {
     */
     pub fn fields_match(&self, other: &BsonDocument) -> bool {
         let mut b: bool = true;
-        for self.fields.iter().advance |&(@key, @val)| {
+        for &(@key, @val) in self.fields.iter().advance {
             if !(key==~"_id") {
                 let mut found_match = false;
-                for other.fields.iter().advance |&(@okey, @oval)| {
+                for &(@okey, @oval) in other.fields.iter().advance {
                     found_match |= ((key==okey)&&(val==oval));
                 }
                 b &= found_match;
@@ -471,7 +471,7 @@ impl ToStr for Document {
             Binary(st, ref dat) => fmt!("Binary(%s, %s)", st.to_str(), dat.to_str()),
             ObjectId(ref d) => {
                 let mut s = ~"";
-                for d.iter().advance |&b| {
+                for &b in d.iter().advance {
                     let mut x = fmt!("%x",b as uint);
                     if x.len() == 1 {
                         x = (~"0").append(x);
@@ -499,7 +499,7 @@ impl ToStr for Document {
 //Calculate the size of a BSON object based on its fields.
 priv fn map_size(m: &OrderedHashmap<~str, Document>)  -> i32{
     let mut sz: i32 = 4; //since this map is going in an object, it has a 4-byte size variable
-    for m.iter().advance |&(k, v)| {
+    for &(k, v) in m.iter().advance {
         sz += (k.to_bytes(L_END).len() as i32) + v.size() + 2; //1 byte format code, trailing 0 after each key
     }
     sz + 1 //trailing 0 byte

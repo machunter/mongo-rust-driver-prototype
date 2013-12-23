@@ -84,7 +84,7 @@ impl Collection {
         let mut cmd = ~"";
 
         cmd.push_str(fmt!("\"convertToCapped\":\"%s\"", self.name));
-        for options.iter().advance |&opt| {
+        for &opt in options.iter().advance {
             cmd.push_str(match opt {
                 SIZE(sz) => fmt!(", \"size\":%?", sz),
                 _ => return Err(MongoErr::new(
@@ -191,7 +191,7 @@ impl Collection {
                                                     wc : Option<~[WRITE_CONCERN]>)
                 -> Result<(), MongoErr> {
         let mut bson_docs : ~[BsonDocument] = ~[];
-        for docs.iter().advance |&d| {
+        for &d in docs.iter().advance {
             bson_docs.push(match d.to_bson_t() {
                     Embedded(bson) => *bson,
                     _ => return Err(MongoErr::new(
@@ -319,7 +319,7 @@ impl Collection {
         match options {
             None => (),
             Some(opts) => {
-                for opts.iter().advance |&opt| {
+                for &opt in opts.iter().advance {
                     match opt {
                         NRET(n) => nret = n as i32,
                         NSKIP(n) => nskip = n as i32,
@@ -553,7 +553,7 @@ impl Collection {
             Err(e) => return Err(e),
         };
         let mut indices = ~[];
-        for cursor.advance |ind| {
+        for ind in cursor.advance {
             indices.push(match BsonFormattable::from_bson_t::<MongoIndex>(&Embedded(ind)) {
                 Ok(i) => i,
                 Err(e) => return Err(MongoErr::new(

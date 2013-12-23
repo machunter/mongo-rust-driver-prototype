@@ -77,7 +77,7 @@ impl DB {
         };
 
         // pull out all the names, returning error if any fail
-        for cur.advance |doc| {
+        for doc in cur.advance {
             match doc.find(~"name") {
                 Some(val) => {
                     match val {
@@ -119,7 +119,7 @@ impl DB {
         };
 
         let mut coll : ~[Collection] = ~[];
-        for names.iter().advance |&n| {
+        for &n in names.iter().advance {
             coll.push(Collection::new(self.name.clone(), n, self.client));
         }
 
@@ -165,7 +165,7 @@ impl DB {
         match options {
             None => (),
             Some(opt_arr) => {
-                for opt_arr.iter().advance |&opt| {
+                for &opt in opt_arr.iter().advance {
                     opts_str.push_str(match opt {
                         CAPPED(sz) => fmt!(", \"capped\":true, \"size\":%?", sz),
                         SIZE(sz) => fmt!(", \"size\":%?", sz),
@@ -303,7 +303,7 @@ impl DB {
         concern_doc.put(~"getLastError", Bool(true));
 
         // parse write concern, early exiting if set to <= 0
-        for concern.iter().advance |&opt| {
+        for &opt in concern.iter().advance {
             match opt {
                 JOURNAL(j) => concern_doc.put(~"j", Bool(j)),
                 W_N(w) => {
@@ -338,7 +338,7 @@ impl DB {
         // search for error field
         let mut err_found = false;
         let mut err_doc = Int32(1); // [invalid err_doc]
-        for err_field.iter().advance |&err_result| {
+        for &err_result in err_field.iter().advance {
             match err_result {
                 None => (),
                 Some(doc) => {

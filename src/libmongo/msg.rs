@@ -144,7 +144,7 @@ pub fn msg_to_bytes(msg : &ClientMsg) -> ~[u8] {
             bytes.push_all_move(f.to_bytes(LITTLE_ENDIAN_TRUE));
             bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
             bytes.push(0u8);    // null-terminate name
-            for d.iter().advance |doc| { bytes.push_all_move(doc.to_bson()); }
+            for doc in d.iter().advance { bytes.push_all_move(doc.to_bson()); }
         }
         &OpQuery {
                 header:ref h,
@@ -200,7 +200,7 @@ pub fn msg_to_bytes(msg : &ClientMsg) -> ~[u8] {
             bytes.push_all_move(_header_to_bytes(h));
             bytes.push_all_move(r.to_bytes(LITTLE_ENDIAN_TRUE));
             bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
-            for ids.iter().advance |&cur| {
+            for &cur in ids.iter().advance {
                 bytes.push_all_move(cur.to_bytes(LITTLE_ENDIAN_TRUE));
             }
         }
@@ -244,7 +244,7 @@ pub fn mk_insert(   id : i32,
     let mut len = (   4*sys::size_of::<i32>()
                 + sys::size_of::<i32>()
                 + full.len() + 1) as i32;
-    for docs.iter().advance |&d| { len = len + d.size as i32; }
+    for &d in docs.iter().advance { len = len + d.size as i32; }
 
     OpInsert {
         header : MsgHeader { len : len, id : id, resp_to : 0i32, opcode : OP_INSERT as i32 },
@@ -399,8 +399,7 @@ pub fn parse_reply(header : MsgHeader, bytes : &[u8])
         // pull out documents one-by-one
         let mut docs : ~[~BsonDocument] = ~[];
         let mut head = nret_addr + sys::size_of::<i32>() - flags_addr;
-
-        for (*(nret_addr as *i32) as uint).times {
+        do (*(nret_addr as *i32) as uint).times {
             let size = *((head+flags_addr) as *i32);
 
             let doc_bytes = bytes.slice(head, head+(size as uint)).to_owned();

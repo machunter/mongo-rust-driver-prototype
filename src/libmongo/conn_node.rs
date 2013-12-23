@@ -182,7 +182,7 @@ impl Connection for NodeConnection {
                                 e.err_name.clone(),
                                 e.err_msg.clone())),
                 Ok(msg) => {
-                    for msg.iter().advance |&b| {
+                    for &b in msg.iter().advance {
                         buf.push(b);
                     }
                     Ok(buf.len())
