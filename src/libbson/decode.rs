@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-use std::str::from_bytes;
+use std::str::*;
 use std::int::range;
 use std::cast::transmute;
 use encode::*;
@@ -138,7 +138,7 @@ impl<T:Stream<u8>> BsonParser<T> {
     ///Parse a string without denoting its length. Mainly for keys.
     fn cstring(&mut self) -> ~str {
         let is_0: &fn(&u8) -> bool = |&x| x == 0x00;
-        let s = from_bytes(self.stream.until(is_0));
+        let s = from_utf8(self.stream.until(is_0));
         self.stream.pass(1);
         s
     }

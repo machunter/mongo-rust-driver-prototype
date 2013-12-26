@@ -14,11 +14,11 @@
  */
 
 use std::to_bytes::*;
-use std::str::count_bytes;
+use std::str::*;
 use std::rand::*;
 use extra::serialize::*;
 use tools::ord_hash::*;
-use std::vec::{VecIterator, VecRevIterator};
+use std::vec::{VecIterator, RevIterator};
 
 //TODO: ideally test this on a big-endian machine
 #[cfg(target_endian = "little")]
@@ -179,7 +179,7 @@ impl Encoder for BsonDocEncoder {
     fn emit_f32(&mut self, v: f32) { self.emit_f64(v as f64); }
     fn emit_float(&mut self, v: float) { self.emit_f64(v as f64); }
     fn emit_str(&mut self, v: &str) {
-        self.buf.push_all((1 + count_bytes(v, 0, v.len()) as i32).to_bytes(L_END)
+        self.buf.push_all((1 + v.slice_from(0).slice_chars(0, v.len()).len() as i32).to_bytes(L_END)
             + v.bytes_iter().collect::<~[u8]>() + ~[0u8]);
         }
 
@@ -350,7 +350,7 @@ impl<'self> BsonDocument {
     }
 
     ///Get a reverse iterator for this document.
-    pub fn rev_iter(&'self self) -> VecRevIterator<'self, (@~str, @Document)> {
+    pub fn rev_iter(&'self self) -> RevIterator<'self, (@~str, @Document)> {
         self.fields.rev_iter()
     }
 

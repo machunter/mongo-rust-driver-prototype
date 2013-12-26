@@ -23,14 +23,15 @@ use std::vec::*;
 ///A hashmap which maintains iteration order using a list.
 pub struct OrderedHashmap<K,V> {
     priv map: HashMap<K,V>,
-    priv order: ~[(@K,@V)]
+    priv order: ~[(K,V)]
 }
 
-impl<K:Clone + Hash + Eq + Clone, V:Clone + Clone> Clone for OrderedHashmap<K,V> {
+impl<K:Clone + Hash + Eq + Clone , V:Clone + Clone> Clone for OrderedHashmap<K,V> {
     fn clone(&self) -> OrderedHashmap<K,V> {
         let mut m: HashMap<K,V> = HashMap::new();
-        for &(@k, @v) in self.iter() {
-            m.insert(k.clone(), v.clone());
+        for t in self.iter() {
+            let (k, v) = t.clone();
+            m.insert(k, v);
         }
         OrderedHashmap {
             map: m,
@@ -64,10 +65,10 @@ impl<K:Hash + Eq,V: Eq> Eq for OrderedHashmap<K,V> {
 impl<'self, K: Hash + Eq + Clone,V: Clone> OrderedHashmap<K,V> {
     pub fn len(&self) -> uint { self.map.len() }
     pub fn contains_key(&self, k: &K) -> bool { self.map.contains_key(k) }
-    pub fn iter(&'self self) -> VecIterator<'self, (@K, @V)> {
+    pub fn iter(&'self self) -> VecIterator<'self, (K, V)> {
         self.order.iter()
     }
-    pub fn rev_iter(&'self self) -> Invert<VecIterator<'self, (@K, @V)>> {
+    pub fn rev_iter(&'self self) -> Invert<VecIterator<'self, (K, V)>> {
         self.order.rev_iter()
     }
     pub fn find<'a>(&'a self, k: &K) -> Option<&'a V> {
@@ -76,9 +77,9 @@ impl<'self, K: Hash + Eq + Clone,V: Clone> OrderedHashmap<K,V> {
     pub fn find_mut<'a>(&'a mut self, k: &K) -> Option<&'a mut V> {
         self.map.find_mut(k)
     }
-    pub fn insert(&mut self, k: K, v: V) -> bool {
-        let success = self.map.insert(k.clone(), v.clone());
-        if success { self.order.push((@k, @v)) }
+    pub fn insert(&mut self, k: &K, v: &V) -> bool {
+        let success = self.map.insert(k.clone(),v.clone());
+        if success { self.order.push((k.clone(),v.clone())) }
         success
     }
 
@@ -90,7 +91,8 @@ impl<'self, K: Hash + Eq + Clone,V: Clone> OrderedHashmap<K,V> {
 impl<K:Hash + Eq + ToStr + Clone,V:ToStr + Clone> ToStr for OrderedHashmap<K,V> {
     fn to_str(&self) -> ~str {
         let mut s = ~"{";
-        for &(@k, @v) in self.iter() {
+        for t in self.iter() {
+            let (k, v) = t.clone();
             s.push_str(fmt!(" %s: %s, ", k.to_str(), v.to_str()));
         }
         s = s.slice(0, s.len()-2).to_owned();

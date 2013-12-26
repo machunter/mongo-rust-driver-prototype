@@ -14,26 +14,34 @@
  */
 
 pub trait Stream<T:Eq> {
+
     ///Return if the stream has more values.
     fn has_next(& self) -> bool;
+
     ///Get a borrowed pointer to the first element of the stream.
     fn first<'a>(&'a self) -> &'a T;
+
     ///Move the stream forward by count units.
     fn pass(&mut self, count: uint);
+
     ///Apply a function to the first count units and return the results in a vector.
     fn process<V: Clone>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V];
+
     /**
      * Collect the first count elements and return them in a vector.
     *This is logically equivalent to self.process(count, id), modulo pointer types.
     */
     fn aggregate(&mut self, count: uint) -> ~[T];
+
     ///Aggregate elements of the stream until the head of the stream meets the predicate.
     fn until(&mut self, f: &fn(&T) -> bool) -> ~[T];
+
     /**
      * Look for the elements of search in the first element of the stream.
      * If the first element of the stream matches any element, return the first match.
      */
     fn expect(&self, search: &[T]) -> Option<T>;
+
     ///Skip values which match the listed values until a different one is found.
     fn pass_while(&mut self, to_skip: &[T]);
 }
@@ -49,7 +57,8 @@ impl<T:Eq + Clone> Stream<T> for ~[T] {
         &'a self[0]
     }
     fn pass(&mut self, count: uint) {
-        self.process(count, |x|  {;});
+        self.process(count, |_|  {});
+        ;
     }
 
     fn process<V: Clone>(&mut self, count: uint, f: &fn(&T) -> V) -> ~[V] {
@@ -67,7 +76,8 @@ impl<T:Eq + Clone> Stream<T> for ~[T] {
     }
 
     fn aggregate(&mut self, count: uint) -> ~[T] {
-        self.process(count, |x| x)
+        let closure = |x: &T| -> T { (*x).clone() };
+        self.process(count, closure)
     }
 
     fn until(&mut self, f: &fn(&T) -> bool) -> ~[T] {
@@ -82,9 +92,9 @@ impl<T:Eq + Clone> Stream<T> for ~[T] {
     }
     fn expect(&self, search: &[T]) -> Option<T> {
         if !self.has_next() { return None; }
-        for &choice in search.iter() {
-            if choice == self[0] {
-                return Some(choice);
+        for choice in search.iter() {
+            if choice == &self[0] {
+                return Some(choice.clone());
             }
         }
         None

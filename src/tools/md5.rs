@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-use std::int::range;
 use std::libc::c_int;
 use std::ptr::to_unsafe_ptr;
 use std::to_bytes::*;
@@ -63,7 +62,8 @@ impl MD5State {
     }
 }
 
-fn md5(msg: &str) -> ~str {
+#[fixed_stack_segment]
+pub fn md5(msg: &str) -> ~str {
     let msg_bytes = msg.to_bytes(L_END);
     let m = MD5State::new(msg_bytes.len() as u64);
     let digest: [u8,..16] = [

@@ -14,8 +14,8 @@
  */
 
 use std::char::is_digit;
-use std::str::from_chars;
-use std::float::from_str;
+use std::str;
+use std::float;
 use tools::stream::*;
 use encode::*;
 
@@ -45,14 +45,14 @@ impl ObjParser<Document> for ExtendedJsonParser<~[char]> {
     }
 }
 
-macro_rules! match_insert {
-    ($cb:ident, $key:expr) => {
+macro_rules! match_insert (
+    ($cb:ident, $key:expr, $ret: expr) => (
         match self.$cb() {
-            Ok(bl) => { ret.put($key, bl); }
+            Ok(bl) => { $ret.put($key, bl); }
             Err(e) => return Err(e)
         }
-    }
-}
+    )
+)
 
 ///Main parser implementation for JSON
 impl<T:Stream<char>> ExtendedJsonParser<T> {
@@ -80,13 +80,13 @@ impl<T:Stream<char>> ExtendedJsonParser<T> {
                 Some('\"') => { ret.put(key, self._string('\"')); }
                 Some('\'') => { ret.put(key, self._string('\'')); }
                 Some('t') => {
-                    match_insert!(_bool,key);
+                    match_insert!(_bool,key, ret);
                 }
                 Some('f') => {
-                    match_insert!(_bool,key);
+                    match_insert!(_bool,key, ret);
                 }
                 Some('[') => {
-                    match_insert!(_list,key)
+                    match_insert!(_list,key, ret)
                 }
                 Some('{') => {
                     let o = self.object();
@@ -132,14 +132,14 @@ impl<T:Stream<char>> ExtendedJsonParser<T> {
         let ret: ~[char] = self.stream.until(|c| *c == delim);
         self.stream.pass(1); //pass over end quote
         self.stream.pass_while(&[' ', '\n', '\r', '\t']); //pass over trailing whitespace
-        UString(from_chars(ret))
+        UString(str::from_chars(ret))
     }
 
     ///Parse a number; converts it to float.
     fn _number(&mut self) -> Document {
         let ret = self.stream.until(|c| (*c == ',') ||
             [' ', '\n', '\r', '\t', ']', '}'].contains(c));
-        Double(from_str(from_chars(ret)).unwrap() as f64)
+        Double(from_str::<float>(str::from_chars(ret)).unwrap() as f64)
     }
 
     ///Parse a boolean. Errors for values other than 'true' or 'false'.
@@ -210,13 +210,13 @@ impl<T:Stream<char>> ExtendedJsonParser<T> {
                 Some('\"') => ret.put(i.to_str(), self._string('\"')),
                 Some('\'') => ret.put(i.to_str(), self._string('\'')),
                 Some('t') => {
-                    match_insert!(_bool,i.to_str());
+                    match_insert!(_bool,i.to_str(), ret);
                 }
                 Some('f') => {
-                    match_insert!(_bool,i.to_str());
+                    match_insert!(_bool,i.to_str(), ret);
                 }
                 Some('[') => {
-                    match_insert!(_list,i.to_str());
+                    match_insert!(_list,i.to_str(), ret);
                 }
                 Some('{') => {
                     let o = self.object();

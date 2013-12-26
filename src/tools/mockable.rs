@@ -61,7 +61,7 @@ impl<T:Mockable> Mockable for ~T {
 
 impl<T:Mockable> Mockable for @T {
     fn mock(state: int) -> @T {
-        @Mockable::mock(state)
+        Mockable::mock(state)
     }
 }
 
