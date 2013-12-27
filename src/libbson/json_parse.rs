@@ -92,7 +92,7 @@ impl<T:Stream<char>> ExtendedJsonParser<T> {
                     let o = self.object();
                     if o.is_err() { return o; }
                     let obj = o.unwrap();
-                    let id = ExtendedJsonParser::_keyobj::<T>(&obj);
+                    let id = ExtendedJsonParser::<T>::_keyobj(&obj);
                     if !id.is_none() { ret.put(key, id.unwrap()); }
                     else { ret.put(key, obj); }
                 }
@@ -222,7 +222,7 @@ impl<T:Stream<char>> ExtendedJsonParser<T> {
                     let o = self.object();
                     if o.is_err() { return o; }
                     let obj = o.unwrap();
-                    let id = ExtendedJsonParser::_keyobj::<T>(&obj);
+                    let id = ExtendedJsonParser::<T>::_keyobj::(&obj);
                     if !id.is_none() { ret.put(i.to_str(), id.unwrap()); }
                     else { ret.put(i.to_str(), obj); }
                 }
